@@ -4,26 +4,30 @@ import { getCoeficiente, hasCoeficientes, ANOS_VENDA_DISPONIVEIS, PORTARIA_REF, 
 // ── Form state (VeeValidate) ─────────────────────────────────────────────────
 const currentYear = new Date().getFullYear()
 
-const { defineField, values, setValues } = useForm({
-  initialValues: {
-    valorAquisicao: null as number | null,
-    mesAquisicao: 1,
-    anoAquisicao: currentYear,
-    valorVenda: null as number | null,
-    mesVenda: 1,
-    anoVenda: ANOS_VENDA_DISPONIVEIS[0],
-    imt: null as number | null,
-    impostoSelo: null as number | null,
-    emolumentos: null as number | null,
-    certidaoRP: null as number | null,
-    obras: null as number | null,
-    comissaoImobiliaria: null as number | null,
-    certEnergetico: null as number | null,
-    capitalEmDivida: null as number | null,
-    modoReinvestimento: 'total' as 'total' | 'parcial',
-    valorReinvestido: null as number | null,
-  },
-})
+const defaultValues = {
+  valorAquisicao: null as number | null,
+  mesAquisicao: 1,
+  anoAquisicao: currentYear,
+  valorVenda: null as number | null,
+  mesVenda: 1,
+  anoVenda: ANOS_VENDA_DISPONIVEIS[0],
+  imt: null as number | null,
+  impostoSelo: null as number | null,
+  emolumentos: null as number | null,
+  certidaoRP: null as number | null,
+  obras: null as number | null,
+  comissaoImobiliaria: null as number | null,
+  certEnergetico: null as number | null,
+  capitalEmDivida: null as number | null,
+  modoReinvestimento: 'total' as 'total' | 'parcial' | 'nenhum',
+  valorReinvestido: null as number | null,
+}
+
+const { defineField, values, setValues } = useForm({ initialValues: defaultValues })
+
+function resetForm() {
+  setValues({ ...defaultValues })
+}
 
 const [valorAquisicao] = defineField('valorAquisicao')
 const [mesAquisicao] = defineField('mesAquisicao')
@@ -94,6 +98,7 @@ const valorAReinvestir = computed(() => {
 })
 
 const reinvestimentoEfetivo = computed(() => {
+  if (values.modoReinvestimento === 'nenhum') return 0
   if (values.modoReinvestimento === 'total') return valorAReinvestir.value
   return Math.min(values.valorReinvestido ?? 0, valorAReinvestir.value)
 })
@@ -110,16 +115,44 @@ const maisValiaTributavelParcial = computed(() =>
 
 const showResults = computed(() => (values.valorVenda ?? 0) > 0 && (values.valorAquisicao ?? 0) > 0)
 
-// ── Accordion items ──────────────────────────────────────────────────────────
-const accordionItems = [
-  { value: 'aquisicao', label: 'Despesas na Aquisição', icon: 'i-lucide-home', slot: 'aquisicao' },
-  { value: 'obras', label: 'Encargos com Valorização (Obras)', icon: 'i-lucide-hammer', slot: 'obras' },
-  { value: 'alienacao', label: 'Despesas na Alienação (Venda)', icon: 'i-lucide-tag', slot: 'alienacao' },
-]
+// Warn early if sale price is below the coeficient-adjusted purchase price
+const menosValiaRisco = computed(() =>
+  (values.valorVenda ?? 0) > 0 && (values.valorAquisicao ?? 0) > 0 &&
+  (values.valorVenda ?? 0) < (values.valorAquisicao ?? 0) * coeficiente.value
+)
+
+// ── Accordion items (computed to show subtotals in headers) ──────────────────
+const accordionItems = computed(() => [
+  {
+    value: 'aquisicao',
+    label: despesasAquisicao.value > 0
+      ? `Despesas na Aquisição · ${fmt(despesasAquisicao.value)}`
+      : 'Despesas na Aquisição',
+    icon: 'i-lucide-home',
+    slot: 'aquisicao',
+  },
+  {
+    value: 'obras',
+    label: encargosValorizacao.value > 0
+      ? `Encargos com Valorização (Obras) · ${fmt(encargosValorizacao.value)}`
+      : 'Encargos com Valorização (Obras)',
+    icon: 'i-lucide-hammer',
+    slot: 'obras',
+  },
+  {
+    value: 'alienacao',
+    label: despesasAlienacao.value > 0
+      ? `Despesas na Alienação (Venda) · ${fmt(despesasAlienacao.value)}`
+      : 'Despesas na Alienação (Venda)',
+    icon: 'i-lucide-tag',
+    slot: 'alienacao',
+  },
+])
 
 const reinvestimentoOptions = [
   { label: 'Reinvestimento total', value: 'total' },
   { label: 'Reinvestimento parcial', value: 'parcial' },
+  { label: 'Sem reinvestimento', value: 'nenhum' },
 ]
 
 const fmt = (v: number) =>
@@ -146,10 +179,10 @@ async function handleShare() {
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
-    <UContainer class="max-w-2xl py-10 space-y-5">
+    <UContainer class="max-w-5xl py-10 pb-16 lg:pb-10">
 
       <!-- Header -->
-      <div class="text-center space-y-3 pb-2">
+      <div class="relative text-center space-y-3 pb-6">
         <div class="inline-flex items-center justify-center size-14 rounded-2xl bg-primary-100 dark:bg-primary-900/40 mb-1">
           <UIcon name="i-lucide-house" class="size-7 text-primary-600 dark:text-primary-400" />
         </div>
@@ -159,10 +192,24 @@ async function handleShare() {
             Habitação própria e permanente com reinvestimento — Art. 10.º CIRS
           </p>
         </div>
-        <UButton icon="i-lucide-share-2" variant="ghost" size="sm" @click="handleShare">
-          Partilhar
+        <UButton
+          v-if="showResults"
+          icon="i-lucide-rotate-ccw"
+          variant="ghost"
+          size="xs"
+          color="neutral"
+          class="absolute right-0 top-0"
+          @click="resetForm"
+        >
+          Limpar
         </UButton>
       </div>
+
+      <!-- Two-column grid: form left, results right -->
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
+
+      <!-- LEFT: form sections -->
+      <div class="space-y-5">
 
       <!-- Section 1: Valores da transação -->
       <UCard>
@@ -173,7 +220,7 @@ async function handleShare() {
           </div>
         </template>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- Valor de compra -->
           <div class="space-y-1.5">
             <label class="text-sm font-medium flex items-center gap-1.5">
@@ -194,7 +241,7 @@ async function handleShare() {
             />
           </div>
 
-          <!-- Data de aquisição -->
+          <!-- Data de aquisição — year first -->
           <div class="space-y-1.5">
             <label class="text-sm font-medium flex items-center gap-1.5">
               Data de aquisição
@@ -226,9 +273,14 @@ async function handleShare() {
               :decrement="false"
               class="w-full"
             />
+            <!-- Early warning: less-valia risk -->
+            <p v-if="menosValiaRisco" class="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0" />
+              O valor de venda é inferior ao custo ajustado — o resultado será uma menos-valia.
+            </p>
           </div>
 
-          <!-- Data de venda -->
+          <!-- Data de venda — year first -->
           <div class="space-y-1.5">
             <label class="text-sm font-medium flex items-center gap-1.5">
               Data de venda
@@ -246,22 +298,27 @@ async function handleShare() {
                 class="flex-1"
               />
             </div>
+            <p class="text-xs text-muted">Apenas anos com Portaria publicada disponíveis.</p>
           </div>
         </div>
 
-        <!-- Coeficiente -->
-        <div class="mt-4 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-elevated border border-default">
-          <div class="flex items-center gap-1.5">
+        <!-- Coeficiente — only relevant when >= 24 months -->
+        <div v-if="mesesEntreTransacoes >= 24" class="mt-4 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-elevated border border-default">
+          <div class="flex items-center gap-1.5 min-w-0">
             <UIcon name="i-lucide-trending-up" class="size-3.5 text-muted shrink-0" />
-            <span class="text-sm text-muted">Coeficiente de desvalorização monetária</span>
-            <UTooltip :text="`Só aplicável se ≥ 24 meses entre aquisição e venda. Art. 50.º CIRS — ${PORTARIA_REF}`">
-              <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
+            <div class="min-w-0">
+              <span class="text-sm text-muted">Coeficiente de desvalorização</span>
+              <p v-if="(values.valorAquisicao ?? 0) > 0" class="text-xs text-muted/70 mt-0.5">
+                {{ fmt(values.valorAquisicao ?? 0) }} × {{ coeficiente.toFixed(2) }} = {{ fmt((values.valorAquisicao ?? 0) * coeficiente) }}
+              </p>
+            </div>
+            <UTooltip :text="`Aplicável quando ≥ 24 meses entre aquisição e venda. Art. 50.º CIRS — ${PORTARIA_REF}`">
+              <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help shrink-0" />
             </UTooltip>
           </div>
-          <UBadge :color="coeficienteIndisponivel ? 'warning' : mesesEntreTransacoes < 24 ? 'neutral' : 'primary'" variant="soft">
+          <UBadge :color="coeficienteIndisponivel ? 'warning' : 'primary'" variant="soft" class="shrink-0">
             {{ coeficiente.toFixed(2) }}
-            <span v-if="mesesEntreTransacoes < 24" class="ml-1 opacity-70">&lt; 24 meses</span>
-            <span v-else-if="coeficienteIndisponivel" class="ml-1 opacity-70">estimado</span>
+            <span v-if="coeficienteIndisponivel" class="ml-1 opacity-70">estimado</span>
           </UBadge>
         </div>
 
@@ -279,18 +336,20 @@ async function handleShare() {
       <!-- Section 2: Despesas e Encargos -->
       <UCard>
         <template #header>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <UIcon name="i-lucide-receipt" class="text-primary-500 size-4 shrink-0" />
             <span class="font-semibold">Despesas e Encargos</span>
+            <UBadge color="neutral" variant="soft" size="xs">opcional</UBadge>
             <UTooltip text="Art. 51.º CIRS — apenas despesas inerentes à aquisição e alienação, e encargos de valorização nos últimos 12 anos">
               <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
             </UTooltip>
+            <span class="text-xs text-muted font-normal">— cada euro dedutível reduz a mais-valia</span>
           </div>
         </template>
 
-        <UAccordion :items="accordionItems" type="multiple" :default-value="accordionItems.map(i => i.value)">
+        <UAccordion :items="accordionItems" type="multiple" :default-value="[]">
           <template #aquisicao>
-            <div class="grid grid-cols-2 gap-4 pb-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2">
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   IMT
@@ -360,7 +419,7 @@ async function handleShare() {
           </template>
 
           <template #alienacao>
-            <div class="grid grid-cols-2 gap-4 pb-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2">
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Comissão imobiliária
@@ -426,6 +485,7 @@ async function handleShare() {
               <UTooltip text="Valor do empréstimo a amortizar com o produto da venda. Art. 10.º, n.º 5, al. a) CIRS">
                 <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
               </UTooltip>
+              <span class="text-xs text-muted font-normal">(opcional)</span>
             </label>
             <UInputNumber
               v-model="capitalEmDivida"
@@ -440,8 +500,8 @@ async function handleShare() {
             />
           </div>
 
-          <!-- Valor a reinvestir para isenção total -->
-          <div v-if="showResults" class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-elevated border border-default">
+          <!-- Valor a reinvestir para isenção total — shown as soon as sale value exists -->
+          <div v-if="(values.valorVenda ?? 0) > 0" class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-elevated border border-default">
             <div class="flex items-center gap-1.5">
               <UIcon name="i-lucide-shield-check" class="size-3.5 text-muted shrink-0" />
               <span class="text-sm text-muted">Valor a reinvestir para isenção total</span>
@@ -459,18 +519,10 @@ async function handleShare() {
                 <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
               </UTooltip>
             </label>
-            <div class="flex gap-2">
-              <UButton
-                v-for="opt in reinvestimentoOptions"
-                :key="opt.value"
-                :color="modoReinvestimento === opt.value ? 'primary' : 'neutral'"
-                :variant="modoReinvestimento === opt.value ? 'solid' : 'outline'"
-                size="sm"
-                @click="modoReinvestimento = opt.value as 'total' | 'parcial'"
-              >
-                {{ opt.label }}
-              </UButton>
-            </div>
+            <URadioGroup
+              v-model="modoReinvestimento"
+              :items="reinvestimentoOptions"
+            />
           </div>
 
           <div v-if="modoReinvestimento === 'parcial'" class="space-y-1.5">
@@ -497,29 +549,92 @@ async function handleShare() {
         </div>
       </UCard>
 
-      <!-- Results -->
-      <ResultsDisplay
-        v-if="showResults"
-        :mais-valia="maisValia"
-        :mais-valia-tributavel50="maisValiaTributavel50"
-        :valor-a-reinvestir="valorAReinvestir"
-        :reinvestimento-parcial="modoReinvestimento === 'parcial'"
-        :valor-reinvestido="reinvestimentoEfetivo"
-        :mais-valia-isenta="maisValiaIsenta"
-        :mais-valia-tributavel-parcial="maisValiaTributavelParcial"
-      />
+      <!-- Mobile results (below form, hidden on desktop) -->
+      <div class="lg:hidden">
+        <ResultsDisplay
+          v-if="showResults"
+          :mais-valia="maisValia"
+          :mais-valia-tributavel50="maisValiaTributavel50"
+          :valor-a-reinvestir="valorAReinvestir"
+          :modo-reinvestimento="modoReinvestimento"
+          :valor-reinvestido="reinvestimentoEfetivo"
+          :mais-valia-isenta="maisValiaIsenta"
+          :mais-valia-tributavel-parcial="maisValiaTributavelParcial"
+          @share="handleShare"
+        />
+        <UCard v-else>
+          <div class="py-8 text-center space-y-2">
+            <UIcon name="i-lucide-calculator" class="size-8 mx-auto text-muted opacity-40" />
+            <p class="text-sm text-muted">Preencha o valor de compra e de venda para ver o resultado.</p>
+          </div>
+        </UCard>
+      </div>
+
+      </div><!-- /LEFT -->
+
+      <!-- RIGHT: sticky results sidebar (desktop only) -->
+      <div class="hidden lg:block lg:sticky lg:top-6">
+        <ResultsDisplay
+          v-if="showResults"
+          :mais-valia="maisValia"
+          :mais-valia-tributavel50="maisValiaTributavel50"
+          :valor-a-reinvestir="valorAReinvestir"
+          :modo-reinvestimento="modoReinvestimento"
+          :valor-reinvestido="reinvestimentoEfetivo"
+          :mais-valia-isenta="maisValiaIsenta"
+          :mais-valia-tributavel-parcial="maisValiaTributavelParcial"
+          @share="handleShare"
+        />
+        <UCard v-else>
+          <div class="py-8 text-center space-y-2">
+            <UIcon name="i-lucide-calculator" class="size-8 mx-auto text-muted opacity-40" />
+            <p class="text-sm text-muted">Preencha o valor de compra e de venda para ver o resultado.</p>
+          </div>
+        </UCard>
+      </div>
+
+      </div><!-- /grid -->
 
       <!-- Footer -->
-      <div class="text-center space-y-1 pb-2">
-        <p class="text-xs text-muted px-4">
+      <div class="text-center space-y-1 mt-6 pb-2">
+        <p class="text-xs text-gray-500 dark:text-gray-500 px-4">
           Calculadora de caráter informativo. Não substitui aconselhamento fiscal profissional.
           Consulte um contabilista certificado para a sua situação concreta.
         </p>
-        <p class="text-xs text-muted/50">
+        <p class="text-xs text-gray-400 dark:text-gray-600">
           Última atualização: {{ ULTIMA_ATUALIZACAO }}
         </p>
       </div>
 
     </UContainer>
+
+    <!-- Mobile sticky summary bar -->
+    <Transition name="slide-up">
+      <div
+        v-if="showResults"
+        class="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-default bg-default/95 backdrop-blur-sm px-4 py-3 flex items-center justify-between"
+      >
+        <div class="text-sm">
+          <span class="text-muted">Tributável (50%)</span>
+          <span class="font-semibold ml-2">{{ fmt(maisValiaTributavel50) }}</span>
+        </div>
+        <UButton size="xs" variant="ghost" icon="i-lucide-share-2" @click="handleShare">
+          Partilhar
+        </UButton>
+      </div>
+    </Transition>
+
   </div>
 </template>
+
+<style scoped>
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+</style>

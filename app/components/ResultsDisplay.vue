@@ -3,11 +3,13 @@ const props = defineProps<{
   maisValia: number
   maisValiaTributavel50: number
   valorAReinvestir: number
-  reinvestimentoParcial: boolean
+  modoReinvestimento: 'total' | 'parcial' | 'nenhum'
   valorReinvestido: number
   maisValiaIsenta: number
   maisValiaTributavelParcial: number
 }>()
+
+const emit = defineEmits<{ share: [] }>()
 
 const fmt = (v: number) =>
   new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(v)
@@ -17,13 +19,15 @@ const fmtPct = (v: number) =>
 
 const isLoss = computed(() => props.maisValia < 0)
 const isFullExemption = computed(
-  () => !props.reinvestimentoParcial && props.valorReinvestido >= props.valorAReinvestir
+  () => props.modoReinvestimento === 'total' && props.valorReinvestido >= props.valorAReinvestir && props.valorAReinvestir > 0
 )
 
 const percentagemReinvestimento = computed(() => {
   if (props.valorAReinvestir === 0) return 0
   return Math.min(props.valorReinvestido / props.valorAReinvestir, 1)
 })
+
+const reinvestimentoParcial = computed(() => props.modoReinvestimento === 'parcial')
 </script>
 
 <template>
@@ -42,9 +46,14 @@ const percentagemReinvestimento = computed(() => {
 
     <UCard v-if="!isLoss">
       <template #header>
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-calculator" class="text-primary-500" />
-          <span class="font-semibold text-base">Resultado do Cálculo</span>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-lucide-calculator" class="text-primary-500" />
+            <span class="font-semibold text-base">Resultado do Cálculo</span>
+          </div>
+          <UButton icon="i-lucide-share-2" variant="ghost" size="xs" color="neutral" @click="emit('share')">
+            Partilhar
+          </UButton>
         </div>
       </template>
 
@@ -71,8 +80,8 @@ const percentagemReinvestimento = computed(() => {
           <UBadge color="error" variant="soft" size="lg">{{ fmt(maisValiaTributavel50) }}</UBadge>
         </div>
 
-        <!-- Percentagem de reinvestimento -->
-        <div class="flex items-center justify-between py-2 border-b border-default">
+        <!-- Percentagem de reinvestimento — only shown in partial mode -->
+        <div v-if="reinvestimentoParcial" class="flex items-center justify-between py-2 border-b border-default">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted">Reinvestimento aplicado</span>
             <UTooltip text="Percentagem do valor necessário para isenção total que está a ser reinvestido. Art. 10.º, n.º 5 e n.º 9 CIRS">
