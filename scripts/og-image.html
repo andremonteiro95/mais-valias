@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bg-glow {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 700px 500px at 15% 50%, rgba(37, 99, 235, 0.25) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 400px at 85% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .card {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      padding: 64px 72px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(37, 99, 235, 0.4);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #93c5fd;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #3b82f6;
+    }
+
+    .irs-tag {
+      font-size: 13px;
+      color: #64748b;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    h1 {
+      font-size: 58px;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: #f8fafc;
+    }
+
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .description {
+      font-size: 20px;
+      color: #94a3b8;
+      line-height: 1.5;
+      max-width: 620px;
+      font-weight: 400;
+    }
+
+    .pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    .pill-icon {
+      font-size: 16px;
+    }
+
+    .bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .url {
+      font-size: 16px;
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .visual {
+      position: absolute;
+      right: 64px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      opacity: 0.9;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 20px 24px;
+      width: 220px;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-value.green {
+      color: #10b981;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: #475569;
+      margin-top: 4px;
+    }
+
+    .arrow-down {
+      display: flex;
+      justify-content: center;
+      color: #334155;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="grid-lines"></div>
+
+  <div class="card">
+    <div class="top-row">
+      <div class="badge">
+        <div class="badge-dot"></div>
+        Mais-Valias Imobiliárias
+      </div>
+      <div class="irs-tag">IRS 2025 &nbsp;·&nbsp; Art. 43.º CIRS</div>
+    </div>
+
+    <div class="main">
+      <h1>Calcule as suas<br /><em>mais-valias</em><br />imobiliárias</h1>
+      <p class="description">
+        Coeficientes de desvalorização, despesas dedutíveis<br />
+        e isenção por reinvestimento — tudo num só lugar.
+      </p>
+      <div class="pills">
+        <div class="pill"><span class="pill-icon">📊</span> Portaria 382/2025</div>
+        <div class="pill"><span class="pill-icon">🏠</span> Reinvestimento</div>
+        <div class="pill"><span class="pill-icon">⚡</span> Gratuito</div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="url">maisvalias.andremonteiro.pt</div>
+    </div>
+  </div>
+
+  <div class="visual">
+    <div class="stat-card">
+      <div class="stat-label">Valor de Venda</div>
+      <div class="stat-value">270 000 €</div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="stat-card">
+      <div class="stat-label">Mais-Valia Líquida</div>
+      <div class="stat-value green">55 511 €</div>
+      <div class="stat-sub">Tributável: 27 755 €</div>
+    </div>
+    <div class="arrow-down">↓</div>
+    <div class="stat-card">
+      <div class="stat-label">Com Reinvestimento</div>
+      <div class="stat-value" style="color:#3b82f6">0 €</div>
+      <div class="stat-sub">Isento ao abrigo art. 10.º</div>
+    </div>
+  </div>
+</body>
+</html>

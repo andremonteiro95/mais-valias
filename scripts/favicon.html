@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 512px;
+      height: 512px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent !important;
+    }
+    svg { width: 512px; height: 512px; }
+  </style>
+</head>
+<body>
+  <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#1e3a8a"/>
+        <stop offset="100%" stop-color="#0f172a"/>
+      </linearGradient>
+      <linearGradient id="accent" x1="100" y1="200" x2="420" y2="400" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#3b82f6"/>
+        <stop offset="100%" stop-color="#10b981"/>
+      </linearGradient>
+    </defs>
+    <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+    <path
+      d="M256 108 L96 248 L128 248 L128 400 L224 400 L224 304 L288 304 L288 400 L384 400 L384 248 L416 248 Z"
+      fill="url(#accent)"
+    />
+    <polyline
+      points="140,360 210,290 270,330 380,190"
+      stroke="white" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"
+    />
+    <polyline
+      points="330,175 380,190 365,240"
+      stroke="white" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"
+    />
+  </svg>
+</body>
+</html>
