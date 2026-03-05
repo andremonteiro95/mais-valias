@@ -173,9 +173,9 @@ const accordionItems = computed(() => [
 ]);
 
 const reinvestimentoOptions = [
-  { label: "Reinvestimento total", value: "total" },
-  { label: "Reinvestimento parcial", value: "parcial" },
-  { label: "Sem reinvestimento", value: "nenhum" },
+  { label: "Total", value: "total" },
+  { label: "Parcial", value: "parcial" },
+  { label: "Nenhum", value: "nenhum" },
 ];
 
 const fmt = (v: number) =>
@@ -710,7 +710,15 @@ async function handleShare() {
                     <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
                   </UTooltip>
                 </label>
-                <URadioGroup v-model="modoReinvestimento" :items="reinvestimentoOptions" />
+                <URadioGroup
+                  v-model="modoReinvestimento"
+                  :items="reinvestimentoOptions"
+                  orientation="horizontal"
+                  variant="card"
+                  color="primary"
+                  class="w-full"
+                  :ui="{ list: 'w-full', item: 'flex-1' }"
+                />
               </div>
 
               <div v-if="modoReinvestimento === 'parcial'" class="space-y-1.5">
