@@ -1,13 +1,18 @@
 {
   "name": "mais-valias",
-  "type": "module",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "prepare": "lefthook install",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check"
   },
   "dependencies": {
     "@nuxt/ui": "^4.5.1",
@@ -19,6 +24,9 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
+    "lefthook": "^2.1.2",
+    "oxfmt": "^0.36.0",
+    "oxlint": "^1.51.0",
     "playwright": "^1.58.2"
   }
 }

@@ -1,0 +1,10 @@
+pre-commit:
+  jobs:
+    - name: lint
+      glob: "src/**/*.{js,ts,vue}"
+      run: bunx oxlint --fix {staged_files}
+      stage_fixed: true
+    - name: fmt
+      glob: "src/**/*.{js,ts,vue,json,yaml,yml}"
+      run: bunx oxfmt {staged_files}
+      stage_fixed: true
