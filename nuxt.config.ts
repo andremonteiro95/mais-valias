@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   modules: ["@nuxt/ui", "@vee-validate/nuxt"],
   css: ["~/assets/css/main.css"],
   nitro: {
-    preset: "static",
+    preset: "cloudflare_module",
+    cloudflare: {
+      deployConfig: true,
+    },
   },
 });
