@@ -108,9 +108,7 @@ export const coeficientes: Record<number, Record<number, number>> = {
     2023: 1.02,
     2024: 1.00,
   },
-  2026: {
-    // TODO: preencher após publicação da Portaria
-  },
+  // 2026: no entry — Portaria not yet published; getCoeficiente falls back to 2025
 }
 
 export function getCoeficiente(
@@ -119,5 +117,7 @@ export function getCoeficiente(
 ): number {
   const mesesDiferenca = (anoVenda - anoAquisicao) * 12 + (mesVenda - mesAquisicao)
   if (mesesDiferenca < 24) return 1
-  return coeficientes[anoVenda]?.[anoAquisicao] ?? 1
+  // If no table exists for the sale year, fall back to the previous year as an estimate
+  const tabela = hasCoeficientes(anoVenda) ? coeficientes[anoVenda] : coeficientes[anoVenda - 1]
+  return tabela?.[anoAquisicao] ?? 1
 }

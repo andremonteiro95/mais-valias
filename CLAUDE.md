@@ -23,5 +23,10 @@
 Compra 185.000€ (2023), Venda 270.000€ (2025), Coef 1.02
 → MV = 55.511,40 €, Valor a reinvestir = 107.203,07 €
 
+## Language
+- All code, comments, variable names, and function names must be in English
+- Commit messages and PR descriptions must be in English
+- User-facing UI text (labels, tooltips, alerts) stays in Portuguese
+
 ## Nuxt UI Notes
 - `USelect`: use `value-key` and `label-key` props; items: `[{ label: '2025', value: 2025 }]`

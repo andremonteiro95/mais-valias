@@ -298,7 +298,6 @@ async function handleShare() {
                 class="flex-1"
               />
             </div>
-            <p class="text-xs text-muted">Apenas anos com Portaria publicada disponíveis.</p>
           </div>
         </div>
 
@@ -329,7 +328,7 @@ async function handleShare() {
           variant="soft"
           class="mt-3"
           :title="`Coeficientes de ${values.anoVenda} ainda não publicados`"
-          :description="`A Portaria é tipicamente publicada em outubro/novembro. Até lá, usa-se o coeficiente 1,00 (sem correção monetária) — resultado conservador.`"
+          :description="`A Portaria de ${values.anoVenda} é tipicamente publicada em outubro/novembro. Até lá, é usada uma estimativa baseada nos coeficientes de ${values.anoVenda - 1} — o valor real poderá ser ligeiramente mais favorável.`"
         />
       </UCard>
 
