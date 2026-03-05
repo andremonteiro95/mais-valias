@@ -1,34 +1,48 @@
 <script setup lang="ts">
 import { getCoeficiente, hasCoeficientes, ANOS_VENDA_DISPONIVEIS, PORTARIA_REF, ULTIMA_ATUALIZACAO } from '~/data/coeficientes'
 
-// ── Form state ──────────────────────────────────────────────────────────────
-const valorAquisicao = ref<number | null>(null)
-const mesAquisicao = ref<number>(1)
-const anoAquisicao = ref<number>(2023)
-const valorVenda = ref<number | null>(null)
-const mesVenda = ref<number>(1)
-const anoVenda = ref<number>(ANOS_VENDA_DISPONIVEIS[0])
+// ── Form state (VeeValidate) ─────────────────────────────────────────────────
+const currentYear = new Date().getFullYear()
 
-// Despesas aquisição
-const imt = ref<number | null>(null)
-const impostoSelo = ref<number | null>(null)
-const emolumentos = ref<number | null>(null)
-const certidaoRP = ref<number | null>(null)
+const { defineField, values, setValues } = useForm({
+  initialValues: {
+    valorAquisicao: null as number | null,
+    mesAquisicao: 1,
+    anoAquisicao: currentYear,
+    valorVenda: null as number | null,
+    mesVenda: 1,
+    anoVenda: ANOS_VENDA_DISPONIVEIS[0],
+    imt: null as number | null,
+    impostoSelo: null as number | null,
+    emolumentos: null as number | null,
+    certidaoRP: null as number | null,
+    obras: null as number | null,
+    comissaoImobiliaria: null as number | null,
+    certEnergetico: null as number | null,
+    capitalEmDivida: null as number | null,
+    modoReinvestimento: 'total' as 'total' | 'parcial',
+    valorReinvestido: null as number | null,
+  },
+})
 
-// Encargos valorização
-const obras = ref<number | null>(null)
-
-// Despesas alienação
-const comissaoImobiliaria = ref<number | null>(null)
-const certEnergetico = ref<number | null>(null)
-
-// Crédito & reinvestimento
-const capitalEmDivida = ref<number | null>(null)
-const modoReinvestimento = ref<'total' | 'parcial'>('total')
-const valorReinvestido = ref<number | null>(null)
+const [valorAquisicao] = defineField('valorAquisicao')
+const [mesAquisicao] = defineField('mesAquisicao')
+const [anoAquisicao] = defineField('anoAquisicao')
+const [valorVenda] = defineField('valorVenda')
+const [mesVenda] = defineField('mesVenda')
+const [anoVenda] = defineField('anoVenda')
+const [imt] = defineField('imt')
+const [impostoSelo] = defineField('impostoSelo')
+const [emolumentos] = defineField('emolumentos')
+const [certidaoRP] = defineField('certidaoRP')
+const [obras] = defineField('obras')
+const [comissaoImobiliaria] = defineField('comissaoImobiliaria')
+const [certEnergetico] = defineField('certEnergetico')
+const [capitalEmDivida] = defineField('capitalEmDivida')
+const [modoReinvestimento] = defineField('modoReinvestimento')
+const [valorReinvestido] = defineField('valorReinvestido')
 
 // ── Date options ─────────────────────────────────────────────────────────────
-const currentYear = new Date().getFullYear()
 const yearOptions = Array.from({ length: currentYear - 1972 }, (_, i) => ({
   label: String(currentYear - i),
   value: currentYear - i,
@@ -49,23 +63,23 @@ const monthOptions = [
 ]
 
 // ── Derived calculations ─────────────────────────────────────────────────────
-const coeficiente = computed(() => getCoeficiente(mesAquisicao.value, anoAquisicao.value, mesVenda.value, anoVenda.value))
-const coeficienteIndisponivel = computed(() => !hasCoeficientes(anoVenda.value))
+const coeficiente = computed(() => getCoeficiente(values.mesAquisicao, values.anoAquisicao, values.mesVenda, values.anoVenda))
+const coeficienteIndisponivel = computed(() => !hasCoeficientes(values.anoVenda))
 const mesesEntreTransacoes = computed(() =>
-  (anoVenda.value - anoAquisicao.value) * 12 + (mesVenda.value - mesAquisicao.value)
+  (values.anoVenda - values.anoAquisicao) * 12 + (values.mesVenda - values.mesAquisicao)
 )
 
 const despesasAquisicao = computed(() =>
-  (imt.value ?? 0) + (impostoSelo.value ?? 0) + (emolumentos.value ?? 0) + (certidaoRP.value ?? 0)
+  (values.imt ?? 0) + (values.impostoSelo ?? 0) + (values.emolumentos ?? 0) + (values.certidaoRP ?? 0)
 )
 const despesasAlienacao = computed(() =>
-  (comissaoImobiliaria.value ?? 0) + (certEnergetico.value ?? 0)
+  (values.comissaoImobiliaria ?? 0) + (values.certEnergetico ?? 0)
 )
-const encargosValorizacao = computed(() => obras.value ?? 0)
+const encargosValorizacao = computed(() => values.obras ?? 0)
 
 const maisValia = computed(() => {
-  const vr = valorVenda.value ?? 0
-  const va = valorAquisicao.value ?? 0
+  const vr = values.valorVenda ?? 0
+  const va = values.valorAquisicao ?? 0
   return vr - va * coeficiente.value - encargosValorizacao.value - despesasAquisicao.value - despesasAlienacao.value
 })
 
@@ -74,14 +88,14 @@ const maisValiaTributavel50 = computed(() =>
 )
 
 const valorAReinvestir = computed(() => {
-  const vr = valorVenda.value ?? 0
-  const capital = capitalEmDivida.value ?? 0
+  const vr = values.valorVenda ?? 0
+  const capital = values.capitalEmDivida ?? 0
   return Math.max(0, vr - capital)
 })
 
 const reinvestimentoEfetivo = computed(() => {
-  if (modoReinvestimento.value === 'total') return valorAReinvestir.value
-  return Math.min(valorReinvestido.value ?? 0, valorAReinvestir.value)
+  if (values.modoReinvestimento === 'total') return valorAReinvestir.value
+  return Math.min(values.valorReinvestido ?? 0, valorAReinvestir.value)
 })
 
 const maisValiaIsenta = computed(() => {
@@ -94,7 +108,7 @@ const maisValiaTributavelParcial = computed(() =>
   Math.max(0, (maisValia.value - maisValiaIsenta.value) * 0.5)
 )
 
-const showResults = computed(() => (valorVenda.value ?? 0) > 0 && (valorAquisicao.value ?? 0) > 0)
+const showResults = computed(() => (values.valorVenda ?? 0) > 0 && (values.valorAquisicao ?? 0) > 0)
 
 // ── Accordion items ──────────────────────────────────────────────────────────
 const accordionItems = [
@@ -110,6 +124,24 @@ const reinvestimentoOptions = [
 
 const fmt = (v: number) =>
   new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(v)
+
+// ── Shareable links ───────────────────────────────────────────────────────────
+const route = useRoute()
+const { decode, copyToClipboard } = useShareableLink()
+const toast = useToast()
+
+onMounted(() => {
+  const s = route.query.s as string | undefined
+  if (s) {
+    const state = decode(s)
+    if (state) setValues(state as Parameters<typeof setValues>[0])
+  }
+})
+
+async function handleShare() {
+  await copyToClipboard(values)
+  toast.add({ title: 'Link copiado!', color: 'success' })
+}
 </script>
 
 <template>
@@ -127,6 +159,9 @@ const fmt = (v: number) =>
             Habitação própria e permanente com reinvestimento — Art. 10.º CIRS
           </p>
         </div>
+        <UButton icon="i-lucide-share-2" variant="ghost" size="sm" @click="handleShare">
+          Partilhar
+        </UButton>
       </div>
 
       <!-- Section 1: Valores da transação -->
@@ -236,7 +271,7 @@ const fmt = (v: number) =>
           icon="i-lucide-triangle-alert"
           variant="soft"
           class="mt-3"
-          :title="`Coeficientes de ${anoVenda} ainda não publicados`"
+          :title="`Coeficientes de ${values.anoVenda} ainda não publicados`"
           :description="`A Portaria é tipicamente publicada em outubro/novembro. Até lá, usa-se o coeficiente 1,00 (sem correção monetária) — resultado conservador.`"
         />
       </UCard>
