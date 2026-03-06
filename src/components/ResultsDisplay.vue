@@ -45,11 +45,9 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
         <span class="flex items-center gap-1.5">
           O valor de venda é inferior ao custo ajustado — não há mais-valia tributável. A
           menos-valia pode ser deduzida a mais-valias de outros imóveis no mesmo ano.
-          <UTooltip
+          <InfoTooltip
             text="Art. 55.º CIRS — o saldo negativo pode ser reportado e deduzido a mais-valias dos cinco anos seguintes. Apenas aplicável a residentes."
-          >
-            <UIcon name="i-lucide-info" class="size-3.5 cursor-help shrink-0" />
-          </UTooltip>
+          />
         </span>
       </template>
     </UAlert>
@@ -78,11 +76,9 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
         <div class="flex items-center justify-between py-2 border-b border-default">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted">Mais-valia bruta</span>
-            <UTooltip
+            <InfoTooltip
               text="MV = VR − (VA × Coef.) − Encargos valorização − Despesas. Art. 44.º a 51.º CIRS"
-            >
-              <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-            </UTooltip>
+            />
           </div>
           <UBadge color="warning" variant="soft" size="lg">{{ fmt(maisValia) }}</UBadge>
         </div>
@@ -91,11 +87,9 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
         <div class="flex items-center justify-between py-2 border-b border-default">
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted">Mais-valia tributável (50%)</span>
-            <UTooltip
+            <InfoTooltip
               text="Para residentes em Portugal, apenas 50% do saldo é tributado às taxas progressivas do IRS. Art. 43.º, n.º 2, al. b) CIRS"
-            >
-              <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-            </UTooltip>
+            />
           </div>
           <UBadge color="error" variant="soft" size="lg">{{ fmt(maisValiaTributavel50) }}</UBadge>
         </div>
@@ -107,11 +101,9 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
         >
           <div class="flex items-center gap-2">
             <span class="text-sm text-muted">Reinvestimento aplicado</span>
-            <UTooltip
+            <InfoTooltip
               text="Percentagem do valor necessário para isenção total que está a ser reinvestido. Art. 10.º, n.º 5 e n.º 9 CIRS"
-            >
-              <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-            </UTooltip>
+            />
           </div>
           <UBadge
             :color="
@@ -135,11 +127,9 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
               <span class="flex items-center gap-1.5">
                 Reinvestindo a totalidade do valor necessário, a mais-valia fica excluída de
                 tributação.
-                <UTooltip
+                <InfoTooltip
                   text="Art. 10.º, n.º 5 CIRS — exclusão condicionada a: reinvestimento em nova HPP, prazo de 24 meses antes a 36 meses após a venda, domicílio fiscal no imóvel alienado nos 12 meses anteriores à transmissão (DL n.º 57/2024) e declaração de intenção no Anexo G."
-                >
-                  <UIcon name="i-lucide-info" class="size-3.5 cursor-help shrink-0" />
-                </UTooltip>
+                />
               </span>
             </template>
           </UAlert>
@@ -150,11 +140,9 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
           <div class="flex items-center justify-between py-2 border-b border-default">
             <div class="flex items-center gap-2">
               <span class="text-sm text-muted">Mais-valia isenta (proporcional)</span>
-              <UTooltip
+              <InfoTooltip
                 text="MV isenta = MV total × (reinvestido / valor a reinvestir). Art. 10.º, n.º 9 CIRS"
-              >
-                <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-              </UTooltip>
+              />
             </div>
             <UBadge color="success" variant="soft" size="lg">{{ fmt(maisValiaIsenta) }}</UBadge>
           </div>
@@ -164,9 +152,7 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
               <span class="text-sm text-muted"
                 >Mais-valia tributável após reinvestimento parcial (50%)</span
               >
-              <UTooltip text="(MV total − MV isenta) × 50%. Art. 10.º, n.º 9 CIRS">
-                <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-              </UTooltip>
+              <InfoTooltip text="(MV total − MV isenta) × 50%. Art. 10.º, n.º 9 CIRS" />
             </div>
             <UBadge color="error" variant="soft" size="lg">{{
               fmt(maisValiaTributavelParcial)
@@ -179,9 +165,7 @@ const reinvestimentoParcial = computed(() => props.modoReinvestimento === "parci
         <p class="text-xs text-muted flex items-center gap-1.5">
           <UIcon name="i-lucide-clock" class="size-3.5 shrink-0" />
           Prazo de reinvestimento: 24 meses antes a 36 meses após a venda.
-          <UTooltip text="Art. 10.º, n.º 5, al. b) CIRS">
-            <UIcon name="i-lucide-info" class="size-3 cursor-help" />
-          </UTooltip>
+          <InfoTooltip text="Art. 10.º, n.º 5, al. b) CIRS" />
         </p>
       </template>
     </UCard>

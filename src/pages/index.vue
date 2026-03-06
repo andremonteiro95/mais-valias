@@ -247,11 +247,9 @@ async function handleShare() {
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Valor de compra
-                  <UTooltip
+                  <InfoTooltip
                     text="Preço pelo qual o imóvel foi comprado, conforme escritura pública de compra e venda. Não inclui IMT, Imposto de Selo nem outros custos — esses entram nas despesas dedutíveis. Art. 46.º CIRS"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </label>
                 <UInputNumber
                   v-model="valorAquisicao"
@@ -269,11 +267,9 @@ async function handleShare() {
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Data de aquisição
-                  <UTooltip
+                  <InfoTooltip
                     text="Mês e ano da escritura de compra. Usados para calcular os meses exatos até à venda e determinar se o coeficiente de desvalorização se aplica (≥ 24 meses). Art. 46.º e 50.º CIRS"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </label>
                 <div class="flex gap-2">
                   <USelect
@@ -297,11 +293,9 @@ async function handleShare() {
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Valor de venda
-                  <UTooltip
+                  <InfoTooltip
                     text="Valor de realização constante na escritura de venda. Art. 44.º CIRS"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </label>
                 <UInputNumber
                   v-model="valorVenda"
@@ -327,11 +321,9 @@ async function handleShare() {
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Data de venda
-                  <UTooltip
+                  <InfoTooltip
                     text="Mês e ano da escritura de venda. O ano define qual a Portaria de coeficientes aplicável. Art. 44.º e 50.º CIRS — Portaria n.º 382/2025/1"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </label>
                 <div class="flex gap-2">
                   <USelect
@@ -366,11 +358,9 @@ async function handleShare() {
                     {{ fmt((values.valorAquisicao ?? 0) * coeficiente) }}
                   </p>
                 </div>
-                <UTooltip
+                <InfoTooltip
                   :text="`Aplicável quando ≥ 24 meses entre aquisição e venda. Art. 50.º CIRS — ${PORTARIA_REF}`"
-                >
-                  <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help shrink-0" />
-                </UTooltip>
+                />
               </div>
               <UBadge
                 :color="coeficienteIndisponivel ? 'warning' : 'primary'"
@@ -400,11 +390,9 @@ async function handleShare() {
                 <UIcon name="i-lucide-receipt" class="text-primary-500 size-4 shrink-0" />
                 <span class="font-semibold">Despesas e Encargos</span>
                 <UBadge color="neutral" variant="soft" size="xs">opcional</UBadge>
-                <UTooltip
+                <InfoTooltip
                   text="Art. 51.º CIRS — apenas despesas inerentes à aquisição e alienação, e encargos de valorização nos últimos 12 anos"
-                >
-                  <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                </UTooltip>
+                />
                 <span class="text-xs text-muted font-normal"
                   >— cada euro dedutível reduz a mais-valia</span
                 >
@@ -417,11 +405,9 @@ async function handleShare() {
                   <div class="space-y-1.5">
                     <label class="text-sm font-medium flex items-center gap-1.5">
                       IMT
-                      <UTooltip
+                      <InfoTooltip
                         text="Imposto Municipal sobre Transmissões — obrigatório na aquisição. Dedutível. Art. 51.º, n.º 1, al. a) CIRS"
-                      >
-                        <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                      </UTooltip>
+                      />
                     </label>
                     <UInputNumber
                       v-model="imt"
@@ -443,11 +429,9 @@ async function handleShare() {
                   <div class="space-y-1.5">
                     <label class="text-sm font-medium flex items-center gap-1.5">
                       Imposto de Selo
-                      <UTooltip
+                      <InfoTooltip
                         text="Imposto de Selo da aquisição — obrigatório. Dedutível. Art. 51.º, n.º 1, al. a) CIRS"
-                      >
-                        <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                      </UTooltip>
+                      />
                     </label>
                     <UInputNumber
                       v-model="impostoSelo"
@@ -469,11 +453,9 @@ async function handleShare() {
                   <div class="space-y-1.5">
                     <label class="text-sm font-medium flex items-center gap-1.5">
                       Emolumentos escritura
-                      <UTooltip
+                      <InfoTooltip
                         text="Emolumentos da escritura de compra e venda. Dedutível. Art. 51.º CIRS"
-                      >
-                        <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                      </UTooltip>
+                      />
                     </label>
                     <UInputNumber
                       v-model="emolumentos"
@@ -495,9 +477,7 @@ async function handleShare() {
                   <div class="space-y-1.5">
                     <label class="text-sm font-medium flex items-center gap-1.5">
                       Certidão Registo Predial
-                      <UTooltip text="Custo necessário à aquisição. Dedutível. Art. 51.º CIRS">
-                        <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                      </UTooltip>
+                      <InfoTooltip text="Custo necessário à aquisição. Dedutível. Art. 51.º CIRS" />
                     </label>
                     <UInputNumber
                       v-model="certidaoRP"
@@ -532,11 +512,9 @@ async function handleShare() {
                   <div class="space-y-1.5">
                     <label class="text-sm font-medium flex items-center gap-1.5">
                       Encargos com valorização (obras)
-                      <UTooltip
+                      <InfoTooltip
                         text="Obras realizadas nos últimos 12 anos que valorizem o imóvel, comprovadas por fatura com NIF e pagamento por MB/TRF. Art. 51.º CIRS — CAAD Proc. 634/2023"
-                      >
-                        <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                      </UTooltip>
+                      />
                     </label>
                     <UInputNumber
                       v-model="obras"
@@ -566,11 +544,9 @@ async function handleShare() {
                   <div class="space-y-1.5">
                     <label class="text-sm font-medium flex items-center gap-1.5">
                       Comissão imobiliária
-                      <UTooltip
+                      <InfoTooltip
                         text="Dedutível se comprovada por fatura. Inclui IVA. Art. 51.º CIRS"
-                      >
-                        <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                      </UTooltip>
+                      />
                     </label>
                     <UInputNumber
                       v-model="comissaoImobiliaria"
@@ -592,9 +568,7 @@ async function handleShare() {
                   <div class="space-y-1.5">
                     <label class="text-sm font-medium flex items-center gap-1.5">
                       Certificado energético
-                      <UTooltip text="Obrigatório para a venda. Dedutível. Art. 51.º CIRS">
-                        <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                      </UTooltip>
+                      <InfoTooltip text="Obrigatório para a venda. Dedutível. Art. 51.º CIRS" />
                     </label>
                     <UInputNumber
                       v-model="certEnergetico"
@@ -638,11 +612,9 @@ async function handleShare() {
               >
                 <span class="flex items-center gap-1.5">
                   Total dedutível
-                  <UTooltip
+                  <InfoTooltip
                     text="Soma das despesas inerentes à aquisição + encargos de valorização + despesas inerentes à alienação. Este valor é deduzido ao valor de realização no cálculo da mais-valia. Art. 51.º CIRS"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </span>
                 <span>{{ fmt(despesasAquisicao + encargosValorizacao + despesasAlienacao) }}</span>
               </div>
@@ -662,11 +634,9 @@ async function handleShare() {
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Capital em dívida (crédito habitação)
-                  <UTooltip
+                  <InfoTooltip
                     text="Valor do empréstimo a amortizar com o produto da venda. Art. 10.º, n.º 5, al. a) CIRS"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                   <span class="text-xs text-muted font-normal">(opcional)</span>
                 </label>
                 <UInputNumber
@@ -690,11 +660,9 @@ async function handleShare() {
                 <div class="flex items-center gap-1.5">
                   <UIcon name="i-lucide-shield-check" class="size-3.5 text-muted shrink-0" />
                   <span class="text-sm text-muted">Valor a reinvestir para isenção total</span>
-                  <UTooltip
+                  <InfoTooltip
                     text="VR − capital em dívida. Apenas capitais próprios contam; a parte financiada por novo crédito não conta. Art. 10.º, n.º 5, al. a) CIRS"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </div>
                 <UBadge color="success" variant="soft" size="lg">{{
                   fmt(valorAReinvestir)
@@ -704,11 +672,9 @@ async function handleShare() {
               <div class="space-y-2">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Intenção de reinvestimento
-                  <UTooltip
+                  <InfoTooltip
                     text="Deve declarar a intenção de reinvestir no Quadro 5-A do Anexo G da declaração de IRS do ano da venda — mesmo que o reinvestimento ainda não esteja concluído. Art. 10.º, n.º 5 e n.º 9 CIRS — Portaria n.º 39-B/2024"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </label>
                 <URadioGroup
                   v-model="modoReinvestimento"
@@ -724,11 +690,9 @@ async function handleShare() {
               <div v-if="modoReinvestimento === 'parcial'" class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Valor que pretende reinvestir
-                  <UTooltip
+                  <InfoTooltip
                     text="Exclusão proporcional: MV isenta = MV × (reinvestido / valor a reinvestir). Art. 10.º, n.º 9 CIRS"
-                  >
-                    <UIcon name="i-lucide-info" class="text-muted size-3.5 cursor-help" />
-                  </UTooltip>
+                  />
                 </label>
                 <UInputNumber
                   v-model="valorReinvestido"
