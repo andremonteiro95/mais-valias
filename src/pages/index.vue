@@ -133,7 +133,6 @@ const showResults = computed(
   () => (values.valorVenda ?? 0) > 0 && (values.valorAquisicao ?? 0) > 0,
 );
 
-// Warn early if sale price is below the coeficient-adjusted purchase price
 const menosValiaRisco = computed(
   () =>
     (values.valorVenda ?? 0) > 0 &&
@@ -141,7 +140,7 @@ const menosValiaRisco = computed(
     (values.valorVenda ?? 0) < (values.valorAquisicao ?? 0) * coeficiente.value,
 );
 
-// ── Accordion items (computed to show subtotals in headers) ──────────────────
+// ── Accordion items ──────────────────────────────────────────────────────────
 const accordionItems = computed(() => [
   {
     value: "aquisicao",
@@ -181,6 +180,12 @@ const reinvestimentoOptions = [
 const fmt = (v: number) =>
   new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(v);
 
+function fmtCompact(v: number): string {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M€`;
+  if (v >= 1_000) return `${Math.round(v / 1_000)}k€`;
+  return `${Math.round(v)}€`;
+}
+
 // ── Shareable links ───────────────────────────────────────────────────────────
 const route = useRoute();
 const { decode, copyToClipboard } = useShareableLink();
@@ -198,11 +203,117 @@ async function handleShare() {
   await copyToClipboard(values);
   toast.add({ title: "Link copiado!", color: "success" });
 }
+
+// ── Pinned snapshots ──────────────────────────────────────────────────────────
+interface PinnedSnapshot {
+  id: number;
+  snapshotKey: string;
+  formValues: typeof defaultValues;
+  // display / diff fields
+  valorVenda: number | null;
+  anoVenda: number;
+  coef: number;
+  maisValia: number;
+  maisValiaTributavel50: number;
+  valorAReinvestir: number;
+  maisValiaIsenta: number;
+  maisValiaTributavelParcial: number;
+  modoReinvestimento: "total" | "parcial" | "nenhum";
+  valorReinvestido: number | null;
+}
+
+const currentSnapshotKey = computed(() =>
+  [
+    Math.round(maisValia.value),
+    Math.round(maisValiaTributavel50.value),
+    Math.round(valorAReinvestir.value),
+  ].join("|"),
+);
+
+const pinned = ref<PinnedSnapshot[]>([]);
+const pinnedCounter = ref(0);
+const activeCompareId = ref<number | null>(null);
+const showCompareModal = ref(false);
+
+const pinnedSnapshot = computed(
+  () => pinned.value.find((p) => p.id === activeCompareId.value) ?? null,
+);
+
+function pinCurrent() {
+  pinnedCounter.value++;
+  pinned.value.push({
+    id: pinnedCounter.value,
+    snapshotKey: currentSnapshotKey.value,
+    formValues: { ...values } as typeof defaultValues,
+    valorVenda: values.valorVenda,
+    anoVenda: values.anoVenda,
+    coef: coeficiente.value,
+    maisValia: maisValia.value,
+    maisValiaTributavel50: maisValiaTributavel50.value,
+    valorAReinvestir: valorAReinvestir.value,
+    maisValiaIsenta: maisValiaIsenta.value,
+    maisValiaTributavelParcial: maisValiaTributavelParcial.value,
+    modoReinvestimento: values.modoReinvestimento,
+    valorReinvestido: values.valorReinvestido,
+  });
+}
+
+function removePinned(id: number) {
+  if (activeCompareId.value === id) activeCompareId.value = null;
+  pinned.value = pinned.value.filter((p) => p.id !== id);
+}
+
+function toggleCompare(id: number) {
+  activeCompareId.value = activeCompareId.value === id ? null : id;
+}
+
+function clearPinned() {
+  pinned.value = [];
+  activeCompareId.value = null;
+}
+
+function restoreSnapshot(p: PinnedSnapshot) {
+  setValues(p.formValues as Parameters<typeof setValues>[0]);
+}
+
+// Delta helpers
+const diffMaisValia = computed(() => {
+  if (!pinnedSnapshot.value) return null;
+  return maisValia.value - pinnedSnapshot.value.maisValia;
+});
+
+const diffTributavel = computed(() => {
+  if (!pinnedSnapshot.value) return null;
+  return maisValiaTributavel50.value - pinnedSnapshot.value.maisValiaTributavel50;
+});
+
+const diffAReinvestir = computed(() => {
+  if (!pinnedSnapshot.value) return null;
+  return valorAReinvestir.value - pinnedSnapshot.value.valorAReinvestir;
+});
+
+const diffVerdict = computed(() => {
+  if (!pinnedSnapshot.value) return null;
+  const d = diffTributavel.value ?? 0;
+  if (Math.abs(d) < 1) return "neutral";
+  return d < 0 ? "better" : "worse";
+});
+
+// Best pinned snapshot (lowest tributável)
+const bestPinnedId = computed(() => {
+  if (pinned.value.length < 2) return null;
+  return pinned.value.reduce((best, p) =>
+    p.maisValiaTributavel50 < best.maisValiaTributavel50 ? p : best,
+  ).id;
+});
+
+// Whether pinned bar is visible (affects padding)
+const hasPinnedBar = computed(() => pinned.value.length > 0);
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-950">
-    <UContainer class="max-w-5xl py-10 pb-16 lg:pb-10">
+    <UContainer class="max-w-5xl py-10" :class="hasPinnedBar ? 'pb-36' : 'pb-6'">
       <!-- Header -->
       <div class="relative text-center space-y-3 pb-6">
         <div
@@ -263,7 +374,7 @@ async function handleShare() {
                 />
               </div>
 
-              <!-- Data de aquisição — year first -->
+              <!-- Data de aquisição -->
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Data de aquisição
@@ -307,7 +418,6 @@ async function handleShare() {
                   :decrement="false"
                   class="w-full"
                 />
-                <!-- Early warning: less-valia risk -->
                 <p
                   v-if="menosValiaRisco"
                   class="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1"
@@ -317,7 +427,7 @@ async function handleShare() {
                 </p>
               </div>
 
-              <!-- Data de venda — year first -->
+              <!-- Data de venda -->
               <div class="space-y-1.5">
                 <label class="text-sm font-medium flex items-center gap-1.5">
                   Data de venda
@@ -344,7 +454,7 @@ async function handleShare() {
               </div>
             </div>
 
-            <!-- Coeficiente — only relevant when >= 24 months -->
+            <!-- Coeficiente -->
             <div
               v-if="mesesEntreTransacoes >= 24"
               class="mt-4 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-elevated border border-default"
@@ -652,7 +762,6 @@ async function handleShare() {
                 />
               </div>
 
-              <!-- Valor a reinvestir para isenção total — shown as soon as sale value exists -->
               <div
                 v-if="(values.valorVenda ?? 0) > 0"
                 class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-lg bg-elevated border border-default"
@@ -712,7 +821,108 @@ async function handleShare() {
           </UCard>
 
           <!-- Mobile results (below form, hidden on desktop) -->
-          <div class="lg:hidden">
+          <div class="lg:hidden space-y-3">
+            <!-- Diff card — mobile -->
+            <div
+              v-if="pinnedSnapshot"
+              class="rounded-xl border border-default bg-default p-4 space-y-3"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-muted">
+                  A comparar com fixado #{{ pinnedSnapshot.id }}
+                </span>
+                <UButton
+                  size="xs"
+                  variant="ghost"
+                  color="neutral"
+                  icon="i-lucide-x"
+                  @click="activeCompareId = null"
+                />
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-muted">Mais-valia</span>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">{{ fmt(maisValia) }}</span>
+                    <span class="text-xs text-muted">vs {{ fmt(pinnedSnapshot.maisValia) }}</span>
+                    <span
+                      v-if="diffMaisValia !== null"
+                      :class="
+                        diffMaisValia < 0
+                          ? 'text-success-500'
+                          : diffMaisValia > 0
+                            ? 'text-error-500'
+                            : 'text-muted'
+                      "
+                      class="text-xs font-semibold"
+                    >
+                      {{ diffMaisValia > 0 ? "+" : "" }}{{ fmt(diffMaisValia) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-muted">Tributável (50%)</span>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">{{ fmt(maisValiaTributavel50) }}</span>
+                    <span class="text-xs text-muted"
+                      >vs {{ fmt(pinnedSnapshot.maisValiaTributavel50) }}</span
+                    >
+                    <span
+                      v-if="diffTributavel !== null"
+                      :class="
+                        diffTributavel < 0
+                          ? 'text-success-500'
+                          : diffTributavel > 0
+                            ? 'text-error-500'
+                            : 'text-muted'
+                      "
+                      class="text-xs font-semibold"
+                    >
+                      {{ diffTributavel > 0 ? "+" : "" }}{{ fmt(diffTributavel) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-muted">A reinvestir</span>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium">{{ fmt(valorAReinvestir) }}</span>
+                    <span class="text-xs text-muted"
+                      >vs {{ fmt(pinnedSnapshot.valorAReinvestir) }}</span
+                    >
+                    <span
+                      v-if="diffAReinvestir !== null"
+                      :class="
+                        diffAReinvestir > 0
+                          ? 'text-success-500'
+                          : diffAReinvestir < 0
+                            ? 'text-error-500'
+                            : 'text-muted'
+                      "
+                      class="text-xs font-semibold"
+                    >
+                      {{ diffAReinvestir > 0 ? "+" : "" }}{{ fmt(diffAReinvestir) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <UAlert
+                v-if="diffVerdict === 'better'"
+                color="success"
+                icon="i-lucide-trending-down"
+                title="Cenário atual mais favorável"
+                description="A tributação atual é menor do que o fixado."
+                variant="soft"
+              />
+              <UAlert
+                v-else-if="diffVerdict === 'worse'"
+                color="error"
+                icon="i-lucide-trending-up"
+                title="Cenário fixado era mais favorável"
+                description="A tributação atual é maior do que o fixado."
+                variant="soft"
+              />
+            </div>
+
             <ResultsDisplay
               v-if="showResults"
               :mais-valia="maisValia"
@@ -732,12 +942,125 @@ async function handleShare() {
                 </p>
               </div>
             </UCard>
+
+            <!-- Pin button — mobile -->
+            <UButton
+              v-if="showResults && maisValia > 0"
+              icon="i-lucide-pin"
+              color="primary"
+              variant="soft"
+              class="w-full justify-center"
+              @click="pinCurrent"
+            >
+              Guardar simulação
+            </UButton>
           </div>
         </div>
         <!-- /LEFT -->
 
         <!-- RIGHT: sticky results sidebar (desktop only) -->
-        <div class="hidden lg:block lg:sticky lg:top-6">
+        <div class="hidden lg:flex lg:flex-col lg:gap-3 lg:sticky lg:top-6">
+          <!-- Diff card — desktop -->
+          <div
+            v-if="pinnedSnapshot"
+            class="rounded-xl border border-default bg-default p-4 space-y-3"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-muted">
+                A comparar com fixado #{{ pinnedSnapshot.id }}
+              </span>
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-x"
+                @click="activeCompareId = null"
+              />
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-muted">Mais-valia</span>
+                <div class="flex items-center gap-2 flex-wrap justify-end">
+                  <span class="font-medium">{{ fmt(maisValia) }}</span>
+                  <span class="text-xs text-muted">vs {{ fmt(pinnedSnapshot.maisValia) }}</span>
+                  <span
+                    v-if="diffMaisValia !== null"
+                    :class="
+                      diffMaisValia < 0
+                        ? 'text-success-500'
+                        : diffMaisValia > 0
+                          ? 'text-error-500'
+                          : 'text-muted'
+                    "
+                    class="text-xs font-semibold"
+                  >
+                    {{ diffMaisValia > 0 ? "+" : "" }}{{ fmt(diffMaisValia) }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-muted">Tributável (50%)</span>
+                <div class="flex items-center gap-2 flex-wrap justify-end">
+                  <span class="font-medium">{{ fmt(maisValiaTributavel50) }}</span>
+                  <span class="text-xs text-muted"
+                    >vs {{ fmt(pinnedSnapshot.maisValiaTributavel50) }}</span
+                  >
+                  <span
+                    v-if="diffTributavel !== null"
+                    :class="
+                      diffTributavel < 0
+                        ? 'text-success-500'
+                        : diffTributavel > 0
+                          ? 'text-error-500'
+                          : 'text-muted'
+                    "
+                    class="text-xs font-semibold"
+                  >
+                    {{ diffTributavel > 0 ? "+" : "" }}{{ fmt(diffTributavel) }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-muted">A reinvestir</span>
+                <div class="flex items-center gap-2 flex-wrap justify-end">
+                  <span class="font-medium">{{ fmt(valorAReinvestir) }}</span>
+                  <span class="text-xs text-muted"
+                    >vs {{ fmt(pinnedSnapshot.valorAReinvestir) }}</span
+                  >
+                  <span
+                    v-if="diffAReinvestir !== null"
+                    :class="
+                      diffAReinvestir > 0
+                        ? 'text-success-500'
+                        : diffAReinvestir < 0
+                          ? 'text-error-500'
+                          : 'text-muted'
+                    "
+                    class="text-xs font-semibold"
+                  >
+                    {{ diffAReinvestir > 0 ? "+" : "" }}{{ fmt(diffAReinvestir) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <UAlert
+              v-if="diffVerdict === 'better'"
+              color="success"
+              icon="i-lucide-trending-down"
+              title="Cenário atual mais favorável"
+              description="A tributação atual é menor do que o fixado."
+              variant="soft"
+            />
+            <UAlert
+              v-else-if="diffVerdict === 'worse'"
+              color="error"
+              icon="i-lucide-trending-up"
+              title="Cenário fixado era mais favorável"
+              description="A tributação atual é maior do que o fixado."
+              variant="soft"
+            />
+          </div>
+
           <ResultsDisplay
             v-if="showResults"
             :mais-valia="maisValia"
@@ -757,6 +1080,18 @@ async function handleShare() {
               </p>
             </div>
           </UCard>
+
+          <!-- Pin button — desktop -->
+          <UButton
+            v-if="showResults && maisValia > 0"
+            icon="i-lucide-pin"
+            color="primary"
+            variant="soft"
+            class="w-full justify-center"
+            @click="pinCurrent"
+          >
+            Fixar resultado
+          </UButton>
         </div>
       </div>
       <!-- /grid -->
@@ -773,21 +1108,192 @@ async function handleShare() {
       </div>
     </UContainer>
 
-    <!-- Mobile sticky summary bar -->
+    <!-- Pinned snapshots bar (fixed bottom) -->
     <Transition name="slide-up">
       <div
-        v-if="showResults"
-        class="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-default bg-default/95 backdrop-blur-sm px-4 py-3 flex items-center justify-between"
+        v-if="hasPinnedBar"
+        class="fixed bottom-0 left-0 right-0 z-50 border-t border-default bg-default/95 backdrop-blur-sm"
       >
-        <div class="text-sm">
-          <span class="text-muted">Tributável (50%)</span>
-          <span class="font-semibold ml-2">{{ fmt(maisValiaTributavel50) }}</span>
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-end gap-3 overflow-x-auto">
+          <!-- Cards -->
+          <div
+            v-for="p in pinned"
+            :key="p.id"
+            class="shrink-0 w-32 rounded-lg border text-xs transition-colors overflow-hidden"
+            :class="
+              activeCompareId === p.id
+                ? 'border-primary-300 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-default bg-elevated'
+            "
+          >
+            <!-- Card header: id + action buttons -->
+            <div class="flex items-center justify-between px-2 pt-1.5 pb-1">
+              <span class="font-mono text-muted font-medium">#{{ p.id }}</span>
+              <div class="flex items-center gap-0.5">
+                <button
+                  v-if="p.snapshotKey !== currentSnapshotKey"
+                  class="p-0.5 rounded hover:bg-default transition-colors"
+                  :title="
+                    activeCompareId === p.id ? 'Sair da comparação' : 'Comparar com estado atual'
+                  "
+                  @click="toggleCompare(p.id)"
+                >
+                  <UIcon
+                    name="i-lucide-arrow-left-right"
+                    class="size-3"
+                    :class="activeCompareId === p.id ? 'text-primary-500' : 'text-muted'"
+                  />
+                </button>
+                <button
+                  class="p-0.5 rounded hover:bg-default transition-colors"
+                  title="Remover simulação"
+                  @click="removePinned(p.id)"
+                >
+                  <UIcon name="i-lucide-x" class="size-3 text-muted" />
+                </button>
+              </div>
+            </div>
+            <!-- Card body: 3 rows, click to restore -->
+            <button
+              class="w-full px-2 pb-2 text-left space-y-1 hover:brightness-95 transition-all"
+              title="Restaurar valores desta simulação"
+              @click="restoreSnapshot(p)"
+            >
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-muted/60 uppercase tracking-wide text-[10px]">VV</span>
+                <span class="font-medium tabular-nums">{{ fmtCompact(p.valorVenda ?? 0) }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-muted/60 uppercase tracking-wide text-[10px]">MV</span>
+                <span class="text-warning-600 dark:text-warning-400 tabular-nums">{{
+                  fmtCompact(p.maisValia)
+                }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-muted/60 uppercase tracking-wide text-[10px]">Trib</span>
+                <span class="text-error-600 dark:text-error-400 font-semibold tabular-nums">{{
+                  fmtCompact(p.maisValiaTributavel50)
+                }}</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Global actions -->
+          <div class="flex flex-col items-start gap-1.5 shrink-0 ml-auto self-center">
+            <UButton size="xs" variant="ghost" color="neutral" @click="clearPinned">
+              Limpar
+            </UButton>
+            <UButton
+              v-if="pinned.length >= 2"
+              size="xs"
+              variant="soft"
+              color="primary"
+              trailing-icon="i-lucide-arrow-right"
+              @click="showCompareModal = true"
+            >
+              Comparar
+            </UButton>
+          </div>
         </div>
-        <UButton size="xs" variant="ghost" icon="i-lucide-share-2" @click="handleShare">
-          Partilhar
-        </UButton>
       </div>
     </Transition>
+
+    <!-- Compare modal -->
+    <UModal v-model:open="showCompareModal" title="Comparação de Simulações" size="xl">
+      <template #body>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr>
+                <th class="text-left py-2 pr-4 text-muted font-medium">Métrica</th>
+                <th
+                  v-for="p in pinned"
+                  :key="p.id"
+                  class="text-right py-2 px-3 font-medium min-w-32"
+                  :class="bestPinnedId === p.id ? 'text-success-600 dark:text-success-400' : ''"
+                >
+                  <div class="flex items-center justify-end gap-1.5">
+                    <UBadge
+                      v-if="bestPinnedId === p.id"
+                      color="success"
+                      variant="soft"
+                      size="xs"
+                      icon="i-lucide-trophy"
+                    >
+                      Melhor
+                    </UBadge>
+                    <span>Fixado #{{ p.id }}</span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-default">
+              <tr>
+                <td class="py-2.5 pr-4 text-muted">Valor de venda</td>
+                <td
+                  v-for="p in pinned"
+                  :key="p.id"
+                  class="py-2.5 px-3 text-right font-medium"
+                  :class="
+                    bestPinnedId === p.id ? 'bg-success-50/50 dark:bg-success-900/10 rounded' : ''
+                  "
+                >
+                  {{ fmt(p.valorVenda ?? 0) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 text-muted">Coeficiente</td>
+                <td
+                  v-for="p in pinned"
+                  :key="p.id"
+                  class="py-2.5 px-3 text-right"
+                  :class="bestPinnedId === p.id ? 'bg-success-50/50 dark:bg-success-900/10' : ''"
+                >
+                  {{ p.coef.toFixed(2) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 text-muted">Mais-valia bruta</td>
+                <td
+                  v-for="p in pinned"
+                  :key="p.id"
+                  class="py-2.5 px-3 text-right text-warning-700 dark:text-warning-400 font-medium"
+                  :class="bestPinnedId === p.id ? 'bg-success-50/50 dark:bg-success-900/10' : ''"
+                >
+                  {{ fmt(p.maisValia) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 text-muted">Tributável (50%)</td>
+                <td
+                  v-for="p in pinned"
+                  :key="p.id"
+                  class="py-2.5 px-3 text-right font-semibold"
+                  :class="[
+                    bestPinnedId === p.id
+                      ? 'bg-success-50/50 dark:bg-success-900/10 text-success-700 dark:text-success-400'
+                      : 'text-error-700 dark:text-error-400',
+                  ]"
+                >
+                  {{ fmt(p.maisValiaTributavel50) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-4 text-muted">Valor a reinvestir</td>
+                <td
+                  v-for="p in pinned"
+                  :key="p.id"
+                  class="py-2.5 px-3 text-right"
+                  :class="bestPinnedId === p.id ? 'bg-success-50/50 dark:bg-success-900/10' : ''"
+                >
+                  {{ fmt(p.valorAReinvestir) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
