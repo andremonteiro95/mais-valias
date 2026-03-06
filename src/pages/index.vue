@@ -253,7 +253,7 @@ async function handleShare() {
                 </label>
                 <UInputNumber
                   v-model="valorAquisicao"
-                  placeholder="185 000,00"
+                  placeholder="150 000,00"
                   :format-options="{ style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }"
                   locale="pt-PT"
                   :min="0"
@@ -299,7 +299,7 @@ async function handleShare() {
                 </label>
                 <UInputNumber
                   v-model="valorVenda"
-                  placeholder="270 000,00"
+                  placeholder="200 000,00"
                   :format-options="{ style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }"
                   locale="pt-PT"
                   :min="0"
@@ -411,7 +411,7 @@ async function handleShare() {
                     </label>
                     <UInputNumber
                       v-model="imt"
-                      placeholder="3 404,80"
+                      placeholder="2 500,00"
                       :format-options="{
                         style: 'currency',
                         currency: 'EUR',
@@ -435,7 +435,7 @@ async function handleShare() {
                     </label>
                     <UInputNumber
                       v-model="impostoSelo"
-                      placeholder="1 480,00"
+                      placeholder="1 200,00"
                       :format-options="{
                         style: 'currency',
                         currency: 'EUR',
@@ -459,7 +459,7 @@ async function handleShare() {
                     </label>
                     <UInputNumber
                       v-model="emolumentos"
-                      placeholder="465,70"
+                      placeholder="400,00"
                       :format-options="{
                         style: 'currency',
                         currency: 'EUR',
@@ -518,7 +518,7 @@ async function handleShare() {
                     </label>
                     <UInputNumber
                       v-model="obras"
-                      placeholder="3 813,10"
+                      placeholder="5 000,00"
                       :format-options="{
                         style: 'currency',
                         currency: 'EUR',
@@ -550,7 +550,7 @@ async function handleShare() {
                     </label>
                     <UInputNumber
                       v-model="comissaoImobiliaria"
-                      placeholder="16 605,00"
+                      placeholder="10 000,00"
                       :format-options="{
                         style: 'currency',
                         currency: 'EUR',
@@ -641,7 +641,7 @@ async function handleShare() {
                 </label>
                 <UInputNumber
                   v-model="capitalEmDivida"
-                  placeholder="162 796,93"
+                  placeholder="80 000,00"
                   :format-options="{ style: 'currency', currency: 'EUR', minimumFractionDigits: 2 }"
                   locale="pt-PT"
                   :min="0"
