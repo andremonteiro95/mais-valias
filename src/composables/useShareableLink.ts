@@ -17,8 +17,15 @@ export function useShareableLink() {
     return `${window.location.origin}${window.location.pathname}?s=${encode(values)}`;
   }
 
-  async function copyToClipboard(values: Record<string, unknown>): Promise<void> {
-    await navigator.clipboard.writeText(generateUrl(values));
+  // Returns true on success, false if the Clipboard API is unavailable (non-HTTPS)
+  // or if the user denied the clipboard-write permission. Toast feedback is handled by the caller.
+  async function copyToClipboard(values: Record<string, unknown>): Promise<boolean> {
+    try {
+      await navigator.clipboard.writeText(generateUrl(values));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   return { encode, decode, generateUrl, copyToClipboard };

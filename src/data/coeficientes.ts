@@ -8,10 +8,6 @@ export const ULTIMA_ATUALIZACAO = "março de 2026";
 // Anos de venda suportados pela app (adicionar à medida que as Portarias são publicadas)
 export const ANOS_VENDA_DISPONIVEIS = [2026, 2025];
 
-export function hasCoeficientes(anoVenda: number): boolean {
-  return Object.keys(coeficientes[anoVenda] ?? {}).length > 0;
-}
-
 export const coeficientes: Record<number, Record<number, number>> = {
   2025: {
     // Até 1903
@@ -153,6 +149,14 @@ export const coeficientes: Record<number, Record<number, number>> = {
   },
   // 2026: no entry — Portaria not yet published; getCoeficiente falls back to 2025
 };
+
+const ANOS_COM_COEFICIENTES = new Set(
+  (Object.keys(coeficientes) as unknown as number[]).map(Number),
+);
+
+export function hasCoeficientes(anoVenda: number): boolean {
+  return ANOS_COM_COEFICIENTES.has(anoVenda);
+}
 
 export function getCoeficiente(
   mesAquisicao: number,
