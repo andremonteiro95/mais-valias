@@ -3,8 +3,6 @@
 // Fonte: Portaria n.º 382/2025/1, de 11 de novembro (Diário da República)
 
 export const PORTARIA_REF = "Portaria n.º 382/2025/1, de 11 de novembro";
-export const ULTIMA_ATUALIZACAO = "março de 2026";
-
 // Anos de venda suportados pela app (adicionar à medida que as Portarias são publicadas)
 export const ANOS_VENDA_DISPONIVEIS = [2026, 2025];
 

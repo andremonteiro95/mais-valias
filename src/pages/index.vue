@@ -43,7 +43,8 @@ const tipoTributacaoOptions = [
 
 <script setup lang="ts">
 import { onUnmounted } from "vue";
-import { PORTARIA_REF, ULTIMA_ATUALIZACAO } from "~/data/coeficientes";
+import { PORTARIA_REF } from "~/data/coeficientes";
+import { ULTIMA_ATUALIZACAO } from "~/constants";
 import { fmt, fmtCompact } from "~/utils/formatters";
 import { useCalculations } from "~/composables/useCalculations";
 import { usePinnedSnapshots } from "~/composables/usePinnedSnapshots";

@@ -64,6 +64,11 @@ export default defineNuxtConfig({
       ],
     },
   },
+  vite: {
+    define: {
+      __BUILD_DATE__: JSON.stringify(new Date().toLocaleDateString("pt-PT", { month: "long", year: "numeric" })),
+    },
+  },
   nitro: {
     preset: "cloudflare_module",
     cloudflare: {
