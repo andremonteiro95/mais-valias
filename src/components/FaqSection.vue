@@ -44,7 +44,7 @@ const faqAccordionItems = previewItems.map((item) => ({
     <UCard :ui="{ body: 'p-0' }">
       <UAccordion :items="faqAccordionItems" type="single">
         <template v-for="item in faqAccordionItems" #[item.slot] :key="item.slot">
-          <div class="px-1 pb-4 space-y-2">
+          <div class="pb-4 space-y-2.5">
             <p class="text-sm text-muted leading-relaxed whitespace-pre-line">
               {{ item.answer }}
             </p>

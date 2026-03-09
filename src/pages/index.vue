@@ -39,6 +39,17 @@ const tipoTributacaoOptions = [
   { label: "Individual", value: "individual" },
   { label: "Conjunta", value: "conjunto" },
 ];
+
+// ── InfoTooltip detail strings (module-scope so \n is a real newline) ──────────
+const DETAILS_COEFICIENTE = `Fator que corrige a inflação, multiplicado pelo valor de aquisição para calcular o custo fiscal atualizado. É publicado anualmente por Portaria do Governo.\n\nSe a Portaria do ano de venda ainda não foi publicada (tipicamente até outubro/novembro), usa-se o coeficiente do ano anterior como estimativa conservadora.`;
+
+const DETAILS_OBRAS = `A partir de 2025, a AT exige: fatura com NIF do proprietário + pagamento por transferência bancária, MB ou cartão. Pagamentos em numerário não são aceites.\n\nApenas obras que valorizem o imóvel são elegíveis — manutenção simples não conta.`;
+
+const DETAILS_CAPITAL_EM_DIVIDA = `A isenção por reinvestimento aplica-se apenas ao capital próprio — o valor de venda menos o crédito em dívida. A parte financiada pelo banco é usada para liquidar o empréstimo existente e não fica disponível para reinvestir.\n\nSe não tem crédito habitação, deixe em branco: o valor a reinvestir será o total da venda.`;
+
+const DETAILS_REINVESTIMENTO_HPP = `Para beneficiar da isenção, tem de verificar TODAS as condições: imóvel vendido é HPP, reinvestimento entre 24 meses antes e 36 meses após a venda, domicílio fiscal no imóvel nos 12 meses anteriores (DL n.º 57/2024), e declaração de intenção obrigatória no Quadro 5-A do Anexo G.`;
+
+const DETAILS_VALOR_A_REINVESTIR = `Se reinvestir este valor ou mais, a mais-valia fica totalmente excluída de tributação. Se reinvestir menos, a isenção é proporcional (reinvestimento parcial).\n\nReinvestir abaixo deste valor não impede a isenção — apenas a reduz proporcionalmente.`;
 </script>
 
 <script setup lang="ts">
@@ -416,7 +427,7 @@ const {
                     </div>
                     <InfoTooltip
                       :text="`Aplicável quando ≥ 24 meses entre aquisição e venda. Art. 50.º CIRS — ${PORTARIA_REF}`"
-                      details="Fator que corrige a inflação, multiplicado pelo valor de aquisição para calcular o custo fiscal atualizado. É publicado anualmente por Portaria do Governo.\n\nSe a Portaria do ano de venda ainda não foi publicada (tipicamente até outubro/novembro), usa-se o coeficiente do ano anterior como estimativa conservadora."
+                      :details="DETAILS_COEFICIENTE"
                       legal="Art. 50.º CIRS"
                       faq-href="/faq#coeficiente"
                     />
@@ -543,7 +554,7 @@ const {
                           Encargos com valorização (obras)
                           <InfoTooltip
                             text="Obras realizadas nos últimos 12 anos que valorizem o imóvel, comprovadas por fatura com NIF e pagamento por MB/TRF. Art. 51.º CIRS — CAAD Proc. 634/2023"
-                            details="A partir de 2025, a AT exige: fatura com NIF do proprietário + pagamento por transferência bancária, MB ou cartão. Pagamentos em numerário não são aceites.\n\nApenas obras que valorizem o imóvel são elegíveis — manutenção simples não conta."
+                            :details="DETAILS_OBRAS"
                             legal="Art. 51.º CIRS — CAAD Proc. 634/2023"
                             faq-href="/faq#requisitos-obras"
                           />
@@ -639,7 +650,7 @@ const {
                       Capital em dívida
                       <InfoTooltip
                         text="Valor do empréstimo a amortizar com o produto da venda. Art. 10.º, n.º 5, al. a) CIRS"
-                        details="A isenção por reinvestimento aplica-se apenas ao capital próprio — o valor de venda menos o crédito em dívida. A parte financiada pelo banco é usada para liquidar o empréstimo existente e não fica disponível para reinvestir.\n\nSe não tem crédito habitação, deixe em branco: o valor a reinvestir será o total da venda."
+                        :details="DETAILS_CAPITAL_EM_DIVIDA"
                         legal="Art. 10.º, n.º 5, al. a) CIRS"
                         faq-href="/faq#capital-em-divida"
                       />
@@ -757,7 +768,7 @@ const {
                       Pretende reinvestir em habitação própria e permanente?
                       <InfoTooltip
                         text="Deve declarar a intenção de reinvestir no Quadro 5-A do Anexo G da declaração de IRS do ano da venda — mesmo que o reinvestimento ainda não esteja concluído. Art. 10.º, n.º 5 e n.º 9 CIRS — Portaria n.º 39-B/2024"
-                        details="Para beneficiar da isenção, tem de verificar TODAS as condições: imóvel vendido é HPP, reinvestimento entre 24 meses antes e 36 meses após a venda, domicílio fiscal no imóvel nos 12 meses anteriores (DL n.º 57/2024), e declaração de intenção obrigatória no Quadro 5-A do Anexo G."
+                        :details="DETAILS_REINVESTIMENTO_HPP"
                         legal="Art. 10.º, n.º 5 e n.º 6 CIRS"
                         faq-href="/faq#condicoes-isencao"
                       />
@@ -841,7 +852,7 @@ const {
                           >
                           <InfoTooltip
                             text="VR − capital em dívida. Apenas capitais próprios contam; a parte financiada por novo crédito não conta. Art. 10.º, n.º 5, al. a) CIRS"
-                            details="Se reinvestir este valor ou mais, a mais-valia fica totalmente excluída de tributação. Se reinvestir menos, a isenção é proporcional (reinvestimento parcial).\n\nReinvestir abaixo deste valor não impede a isenção — apenas a reduz proporcionalmente."
+                            :details="DETAILS_VALOR_A_REINVESTIR"
                             faq-href="/faq#reinvestimento-parcial"
                           />
                         </div>

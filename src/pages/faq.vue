@@ -66,20 +66,19 @@ useHead({
               v-for="(item, idx) in category.items"
               :key="item.id"
               :id="item.id"
-              class="group"
               :class="idx < category.items.length - 1 ? 'border-b border-default' : ''"
             >
-              <details class="[&[open]_summary_svg]:rotate-180">
+              <details class="group">
                 <summary
                   class="flex items-center justify-between gap-3 px-5 py-4 cursor-pointer list-none select-none hover:bg-elevated transition-colors"
                 >
                   <span class="text-sm font-medium">{{ item.question }}</span>
                   <UIcon
                     name="i-lucide-chevron-down"
-                    class="size-4 text-muted shrink-0 transition-transform duration-200"
+                    class="size-4 text-muted shrink-0 transition-transform duration-200 group-open:rotate-180"
                   />
                 </summary>
-                <div class="px-5 pb-5 pt-1 space-y-3">
+                <div class="px-5 pb-5 pt-2 space-y-3 border-t border-default">
                   <p class="text-sm text-muted leading-relaxed whitespace-pre-line">
                     {{ item.answer }}
                   </p>
