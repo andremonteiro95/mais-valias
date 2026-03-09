@@ -5,6 +5,7 @@ const props = withDefaults(
   defineProps<{
     showResults: boolean;
     showReinvestimento?: boolean;
+    ganhoRealizacao: number;
     maisValia: number;
     maisValiaTributavel50: number;
     valorAReinvestir: number;
@@ -99,6 +100,15 @@ const showIrsZero = computed(
       </UAlert>
 
       <div v-else class="space-y-3">
+        <!-- Ganho na realização -->
+        <div class="flex items-center justify-between py-2 border-b border-default">
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-muted">Ganho na realização</span>
+            <InfoTooltip text="VR − VA, antes de ajustes fiscais." />
+          </div>
+          <UBadge color="neutral" variant="soft" size="lg">{{ fmt(ganhoRealizacao) }}</UBadge>
+        </div>
+
         <!-- MV bruta -->
         <div class="flex items-center justify-between py-2 border-b border-default">
           <div class="flex items-center gap-2">
@@ -119,26 +129,6 @@ const showIrsZero = computed(
             />
           </div>
           <UBadge color="error" variant="soft" size="lg">{{ fmt(maisValiaTributavel50) }}</UBadge>
-        </div>
-
-        <!-- Valor a reinvestir para isenção total (only in phase 2, when reinvestimento is relevant) -->
-        <div
-          v-if="
-            showReinvestimento &&
-            !isFullExemption &&
-            modoReinvestimento !== 'nenhum' &&
-            valorAReinvestir > 0
-          "
-          class="flex items-start justify-between gap-3 py-2 border-b border-default"
-        >
-          <span class="flex-1 text-sm text-muted">
-            Valor a reinvestir para isenção total
-            <span class="inline-flex align-middle ml-0.5"
-              ><InfoTooltip
-                text="VR − capital em dívida. Apenas capitais próprios contam; a parte financiada por novo crédito não conta. Art. 10.º, n.º 5, al. a) CIRS"
-            /></span>
-          </span>
-          <UBadge color="success" variant="soft" size="lg">{{ fmt(valorAReinvestir) }}</UBadge>
         </div>
 
         <!-- Reinvestimento (only in phase 2) -->
@@ -188,7 +178,7 @@ const showIrsZero = computed(
           <template v-if="modoReinvestimento === 'parcial' && valorReinvestido > 0">
             <div class="flex items-center justify-between py-2 border-b border-default">
               <div class="flex items-center gap-2">
-                <span class="text-sm text-muted">Mais-valia isenta (proporcional)</span>
+                <span class="text-sm text-muted">Mais-valia isenta</span>
                 <InfoTooltip
                   text="MV isenta = MV total × (reinvestido / valor a reinvestir). Art. 10.º, n.º 9 CIRS"
                 />
@@ -197,7 +187,7 @@ const showIrsZero = computed(
             </div>
             <div class="flex items-start justify-between gap-3 py-2 border-b border-default">
               <span class="flex-1 text-sm text-muted">
-                Mais-valia tributável após reinvestimento (50%)
+                Mais-valia tributável após reinvestimento
                 <span class="inline-flex align-middle ml-0.5"
                   ><InfoTooltip text="(MV total − MV isenta) × 50%. Art. 10.º, n.º 9 CIRS"
                 /></span>
@@ -236,11 +226,6 @@ const showIrsZero = computed(
 
     <template v-if="showReinvestimento" #footer>
       <div class="space-y-1.5">
-        <p class="text-xs text-muted flex items-center gap-1.5">
-          <UIcon name="i-lucide-clock" class="size-3.5 shrink-0" />
-          Prazo de reinvestimento: 24 meses antes a 36 meses após a venda.
-          <InfoTooltip text="Art. 10.º, n.º 5, al. b) CIRS" />
-        </p>
         <p v-if="showIrs" class="text-xs text-muted flex items-center gap-1.5">
           <UIcon name="i-lucide-triangle-alert" class="size-3.5 shrink-0 text-warning-500" />
           Estimativa sem deduções à coleta (saúde, educação, dependentes). Consulte um contabilista

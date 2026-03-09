@@ -119,6 +119,7 @@ const {
   despesasAlienacao,
   encargosValorizacao,
   totalDespesas,
+  ganhoRealizacao,
   maisValia,
   tributavel,
   maisValiaTributavel50,
@@ -622,7 +623,7 @@ const {
                   <div class="flex items-center gap-2">
                     <UIcon name="i-lucide-landmark" class="text-primary-500 size-4 shrink-0" />
                     <span class="font-semibold">Crédito Habitação</span>
-                    <span class="text-xs text-muted font-normal">(opcional)</span>
+                    <UBadge color="neutral" variant="soft" size="xs">opcional</UBadge>
                   </div>
                 </template>
 
@@ -920,6 +921,7 @@ const {
                 <ResultsDisplay
                   :show-results="showResults"
                   :show-reinvestimento="phase === 'confirmed'"
+                  :ganho-realizacao="ganhoRealizacao"
                   :mais-valia="maisValia"
                   :mais-valia-tributavel50="maisValiaTributavel50"
                   :valor-a-reinvestir="valorAReinvestir"
@@ -968,6 +970,7 @@ const {
           <ResultsDisplay
             :show-results="showResults"
             :show-reinvestimento="phase === 'confirmed'"
+            :ganho-realizacao="ganhoRealizacao"
             :mais-valia="maisValia"
             :mais-valia-tributavel50="maisValiaTributavel50"
             :valor-a-reinvestir="valorAReinvestir"

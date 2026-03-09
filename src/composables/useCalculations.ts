@@ -71,6 +71,9 @@ export function useCalculations(values: FormValues) {
   );
 
   // ── Core gain ───────────────────────────────────────────────────────────────
+  /** Simple sale profit: VR − VA, before coeficiente and expense adjustments. */
+  const ganhoRealizacao = computed(() => (values.valorVenda ?? 0) - (values.valorAquisicao ?? 0));
+
   const maisValia = computed(() => {
     const vr = values.valorVenda ?? 0;
     const va = values.valorAquisicao ?? 0;
@@ -195,6 +198,7 @@ export function useCalculations(values: FormValues) {
     encargosValorizacao,
     totalDespesas,
     // Gain
+    ganhoRealizacao,
     maisValia,
     /** Alias for maisValiaTributavel50 — 50 % inclusion with no reinvestment. */
     tributavel,

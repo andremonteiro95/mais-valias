@@ -22,4 +22,19 @@ Para excluir a mais-valia de tributação ao abrigo do Art. 10.º, n.º 5 CIRS, 
 
 ---
 
+## Prazo de Reinvestimento
+
+### Qual é o prazo para reinvestir o produto da venda?
+
+O reinvestimento em nova habitação própria e permanente (HPP) deve ocorrer **entre 24 meses antes e 36 meses após a data da venda**.
+
+- **Antes da venda:** se já adquiriu a nova HPP nos 24 meses anteriores, pode aplicar o valor da venda a esse reinvestimento.
+- **Após a venda:** tem até 36 meses para concluir a aquisição da nova HPP.
+
+Se ainda não tiver reinvestido na data da entrega da declaração de IRS, deve declarar a intenção de reinvestir no **Quadro 5-A do Anexo G**.
+
+**Referência legal:** Art. 10.º, n.º 5, al. b) CIRS
+
+---
+
 <!-- Adicionar mais perguntas frequentes aqui -->
